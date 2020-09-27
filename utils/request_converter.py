@@ -82,7 +82,10 @@ class RequestConverter:
 
     def convert(self) -> (pd.DataFrame, Segment):
 
-        self.is_valid()
+        try:
+            self.is_valid()
+        except Exception as e:
+            raise ValueError(e)
 
         df_dict = {
             CURRENT_TS_FIELD: [self.current_ts],
