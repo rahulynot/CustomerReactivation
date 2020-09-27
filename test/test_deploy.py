@@ -26,7 +26,7 @@ def test_deploy_returns_error_on_invalid_request():
     assert data["Error"] == "'Missing/Incorrect field country_code in the request'"
 
 
-def test_deploy_returns_prediction():
+def test_deploy_returns_receny_segment_prediction():
     valid_request = {
         "customer_id": 123,  # customer id
         "country_code": "Peru",  # customer’s country
@@ -40,6 +40,27 @@ def test_deploy_returns_prediction():
         "/predict", data=json.dumps(valid_request), content_type="application/json",
     )
 
+    assert response.status_code == 200
+
+    data = json.loads(response.get_data(as_text=True))
+    assert data["voucher_amount"] == 2640
+
+
+def test_deploy_returns_frequency_segment_prediction():
+    valid_request = {
+        "customer_id": 123,  # customer id
+        "country_code": "Peru",  # customer’s country
+        "last_order_ts": "2018-05-03 00:00:00",  # ts of the last order placed by a customer
+        "first_order_ts": "2017-05-03 00:00:00",  # ts of the first order placed by a customer
+        "total_orders": 15,  # total orders placed by a customer
+        "segment_name": "frequent_segment",  # which segment a customer belongs to
+    }
+
+    response = app.test_client().post(
+        "/predict", data=json.dumps(valid_request), content_type="application/json",
+    )
+
+    print(response.data)
     assert response.status_code == 200
 
     data = json.loads(response.get_data(as_text=True))

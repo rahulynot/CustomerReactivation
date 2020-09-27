@@ -23,7 +23,7 @@ def _create_country_code_features(df: pd.DataFrame) -> pd.DataFrame:
 
 def _remove_non_feature_colums(df: pd.DataFrame) -> pd.DataFrame:
 
-    df = df.drop("days_since_last_order", axis=1)
+    df = df.drop("days_since_last_order", axis=1, errors="ignore")
     df = df.drop("last_order_ts", axis=1)
     df = df.drop("timestamp", axis=1)
     df = df.drop("total_orders", axis=1)
