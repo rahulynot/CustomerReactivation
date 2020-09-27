@@ -49,6 +49,10 @@ class RequestConverter:
                 self.last_order_ts = datetime.strptime(
                     self.request[LAST_ORDER_TS_FIELD], "%Y-%m-%d %H:%M:%S"
                 ).date()
+
+                if self.last_order_ts > self.current_ts:
+                    raise ValueError()
+
             except ValueError:
                 raise ValueError(
                     f"Invalid {LAST_ORDER_TS_FIELD} {self.request[LAST_ORDER_TS_FIELD]} in the request"

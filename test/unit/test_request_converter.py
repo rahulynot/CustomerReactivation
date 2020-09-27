@@ -60,6 +60,7 @@ def test_is_valid_fails_for_invalid_last_order_ts_key():
         assert f"Missing/Incorrect field {LAST_ORDER_TS_FIELD} in the request" in str(excinfo.value)
 
 
+@freeze_time("2020-01-01")
 def test_is_valid_fails_for_invalid_last_order_ts_value():
 
     requests = [
@@ -67,6 +68,8 @@ def test_is_valid_fails_for_invalid_last_order_ts_value():
         {"customer_id": 123, "country_code": "Peru", "last_order_ts": "",},
         # Incorrect value of last_order_ts
         {"customer_id": 123, "country_code": "Peru", "last_order_ts": "Invalid-value",},
+        # Last order date is in future
+        {"customer_id": 123, "country_code": "Peru", "last_order_ts": "2021-05-03 00:00:00",},
     ]
 
     for request in requests:
