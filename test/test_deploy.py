@@ -1,4 +1,9 @@
-from ...deploy.deploy import app
+import os.path
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+
+from ..deploy import app
 from flask import json
 
 
@@ -38,4 +43,4 @@ def test_deploy_returns_prediction():
     assert response.status_code == 200
 
     data = json.loads(response.get_data(as_text=True))
-    assert data["Success"] == "Feature Generation done"
+    assert data["voucher_amount"] == 2640

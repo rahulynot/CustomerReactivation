@@ -1,8 +1,10 @@
-import pandas as pd
 from datetime import datetime
-from .common import Segment
 
-VALID_COUNTRY_CODES = ["Australia", "China", "Latvia", "Peru"]
+import numpy as np
+import pandas as pd
+
+from .common import VALID_COUNTRY_CODES, Segment
+
 COUNTRY_CODE_FIELD = "country_code"
 LAST_ORDER_TS_FIELD = "last_order_ts"
 TOTAL_ORDER_FIELD = "total_orders"
@@ -94,7 +96,7 @@ class RequestConverter:
             LAST_ORDER_TS_FIELD: [self.last_order_ts],
         }
 
-        df = pd.DataFrame(data=df_dict)
+        df = pd.DataFrame(data=df_dict, dtype=np.int)
 
         if self.segment_name == Segment.RECENCY:
             df["days_since_last_order"] = (df["timestamp"] - df["last_order_ts"]).dt.days
