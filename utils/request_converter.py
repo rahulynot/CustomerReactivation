@@ -7,6 +7,7 @@ COUNTRY_CODE_FIELD = "country_code"
 LAST_ORDER_TS_FIELD = "last_order_ts"
 TOTAL_ORDER_FIELD = "total_orders"
 SEGMENT_NAME_FIELD = "segment_name"
+CURRENT_TS_FIELD = "timestamp"
 
 
 def convert_segment_name(segment_name: str) -> Segment:
@@ -75,5 +76,20 @@ class RequestConverter:
 
         return True
 
-    def convert(self) -> pd.DataFrame:
-        pass
+    def convert(self) -> (pd.DataFrame, Segment):
+
+        self.is_valid()
+
+        df_dict = {
+            CURRENT_TS_FIELD: [self.current_ts],
+            TOTAL_ORDER_FIELD: [self.total_orders],
+            COUNTRY_CODE_FIELD: [self.country_code],
+            LAST_ORDER_TS_FIELD: [self.last_order_ts],
+        }
+
+        df = pd.DataFrame(data=df_dict)
+
+        if self.segment_name == Segment.RECENCY:
+            df["days_since_last_order"] = (df["timestamp"] - df["last_order_ts"]).dt.days
+
+        return df, self.segment_name

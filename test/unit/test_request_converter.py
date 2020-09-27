@@ -1,6 +1,9 @@
-from datetime import datetime
+import datetime
 
+import pandas as pd
 import pytest
+from freezegun import freeze_time
+from pandas._testing import assert_frame_equal
 
 from ...utils.common import Segment
 from ...utils.request_converter import (
@@ -10,6 +13,8 @@ from ...utils.request_converter import (
     TOTAL_ORDER_FIELD,
     RequestConverter,
 )
+
+FAKE_TIME = datetime.datetime(2020, 1, 1, 0, 0, 0)
 
 
 def test_is_valid_fails_for_invalid_country_code_key():
@@ -177,11 +182,61 @@ def test_is_valid_succeeds_for_valid_request():
     assert req_conv.country_code == "Peru"
     assert (
         req_conv.last_order_ts
-        == datetime.strptime(valid_request[LAST_ORDER_TS_FIELD], "%Y-%m-%d %H:%M:%S").date()
+        == datetime.datetime.strptime(
+            valid_request[LAST_ORDER_TS_FIELD], "%Y-%m-%d %H:%M:%S"
+        ).date()
     )
     assert req_conv.total_orders == 15
     assert req_conv.segment_name == Segment.RECENCY
 
 
+def test_convert_request_fails_for_invalid_request():
+
+    invalid_request = {
+        "customer_id": 123,  # customer id
+        "country_code": "Peru",  # customer’s country
+        "last_order_ts": "2018-05-03 00:00:00",  # ts of the last order placed by a customer
+        "first_order_ts": "2017-05-03 00:00:00",  # ts of the first order placed by a customer
+        "total_orders": 15,  # total orders placed by a customer
+        "segment_name": "invalid_segment",  # which segment a customer belongs to
+    }
+
+    req_conv = RequestConverter(invalid_request)
+
+    with pytest.raises(Exception) as excinfo:
+        req_conv.convert()
+    assert f"Invalid {SEGMENT_NAME_FIELD} invalid_segment" in str(excinfo.value)
+
+
+@freeze_time("2020-01-01")
 def test_convert_request():
-    pass
+
+    valid_request = {
+        "customer_id": 123,  # customer id
+        "country_code": "Peru",  # customer’s country
+        "last_order_ts": "2018-05-03 00:00:00",  # ts of the last order placed by a customer
+        "first_order_ts": "2017-05-03 00:00:00",  # ts of the first order placed by a customer
+        "total_orders": 15,  # total orders placed by a customer
+        "segment_name": "frequent_segment",  # which segment a customer belongs to
+    }
+
+    assert datetime.datetime.now() == FAKE_TIME
+
+    expected_dataframe_data = {
+        "timestamp": [datetime.datetime.now().date()],
+        "total_orders": [15],
+        "country_code": ["Peru"],
+        "last_order_ts": [
+            datetime.datetime.strptime(
+                valid_request[LAST_ORDER_TS_FIELD], "%Y-%m-%d %H:%M:%S"
+            ).date()
+        ],
+    }
+
+    expected_dataframe = pd.DataFrame.from_dict(expected_dataframe_data)
+
+    req_conv = RequestConverter(valid_request)
+    converted_frame, segment = req_conv.convert()
+
+    assert_frame_equal(converted_frame, expected_dataframe)
+    assert segment == Segment.FREQUENT
