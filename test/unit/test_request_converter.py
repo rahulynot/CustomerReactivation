@@ -37,7 +37,7 @@ def test_is_valid_fails_for_invalid_country_code_value():
     assert "Invalid  country_code Japan in the request" in str(excinfo.value)
 
 
-def test_is_valid_fails_for_invalid_last_order_ts():
+def test_is_valid_fails_for_invalid_last_order_ts_key():
 
     requests = [
         # Missing last_order_ts
@@ -53,6 +53,26 @@ def test_is_valid_fails_for_invalid_last_order_ts():
         with pytest.raises(KeyError) as excinfo:
             req_conv.is_valid()
         assert "Missing/Incorrect field last_order_ts in the request" in str(excinfo.value)
+
+
+def test_is_valid_fails_for_invalid_last_order_ts_value():
+
+    requests = [
+        # Missing last_order_ts value
+        {"customer_id": 123, "country_code": "Peru", "last_order_ts": "",},
+        # Incorrect value of last_order_ts
+        {"customer_id": 123, "country_code": "Peru", "last_order_ts": "Invalid-value",},
+    ]
+
+    for request in requests:
+
+        req_conv = RequestConverter(request)
+
+        with pytest.raises(ValueError) as excinfo:
+            req_conv.is_valid()
+        assert f"Invalid last_order_ts {request['last_order_ts']} in the request" in str(
+            excinfo.value
+        )
 
 
 def test_convert_request():
