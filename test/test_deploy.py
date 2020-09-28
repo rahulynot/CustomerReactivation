@@ -60,7 +60,6 @@ def test_deploy_returns_frequency_segment_prediction():
         "/predict", data=json.dumps(valid_request), content_type="application/json",
     )
 
-    print(response.data)
     assert response.status_code == 200
 
     data = json.loads(response.get_data(as_text=True))
