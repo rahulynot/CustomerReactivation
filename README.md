@@ -9,10 +9,11 @@ Based on the dataset, it's a fairly stratight-forward problem where the aim is t
 
 ## Usage
 $ cd CustomerReactivation
+
 $ pip install -r requirements.txt #Possibly in a virtual env
 
 ### Tests
-make test
+$ make test
 
 ### Build Docker Image
 $ make build-image
@@ -21,7 +22,7 @@ $ make build-image
 $ make run-app
 
 ### REST interface
-The application can be accessed using a REST interface 'http://localhost:5000/predict'
+The application can be accessed using a REST interface endpoint 'http://localhost:5000/predict'
 
 $ curl --header \
 "Content-Type: application/json" \
